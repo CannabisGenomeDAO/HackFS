@@ -75,3 +75,7 @@ Flatten the contract for contract verification:
 ```
 forge flatten --output assets/artifacts/DatasetTokens.f.sol src/DatasetTokens.sol
 ```
+
+### Deployments
+
+- `2023-06-15` | [Filfox Link](https://calibration.filfox.info/en/address/t410fmr5vtcaekfz2xueystizgookgd23v7u2qqn6hna) | [Commit](https://github.com/CannabisGenomeDAO/HackFS/commit/f961a4dbc742096730221150bf36d510673345f4)
