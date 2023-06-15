@@ -2,5 +2,15 @@
 src = "src"
 out = "out"
 libs = ["lib"]
+verbosity = 3
+chain_id = 314159
 
+[rpc_endpoints]
+calibration = "${CALIBRATION_RPC_URL}"
+
+[fmt]
+line_length = 80
+wrap_comments = true
+tab_width = 2
+number_underscore = "thousands"
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
