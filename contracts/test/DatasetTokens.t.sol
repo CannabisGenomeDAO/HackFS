@@ -133,4 +133,86 @@ contract DatasetTokensTest is DatasetTokens, Test {
 
     datasetTokens.setDatasetTokenURI(id, newURI);
   }
+
+  function testMint() public {
+    uint256 id = 1;
+    uint256 amount = 1;
+
+    vm.expectEmit(true, true, true, true);
+    emit TransferSingle(
+      datasetConsumerOne, address(0), datasetConsumerOne, id, amount
+    );
+
+    vm.prank(datasetConsumerOne);
+    datasetTokens.mint{value: 1 ether}(id, amount, abi.encode());
+
+    assertEq(1, datasetTokens.balanceOf(datasetConsumerOne, id));
+  }
+
+  function testRevertWhenTokenDoesNotExistOnMint() public {
+    uint256 id = 0;
+    uint256 amount = 1;
+
+    vm.expectRevert("Mint: token does not exist.");
+    vm.prank(datasetConsumerOne);
+    datasetTokens.mint{value: 1 ether}(id, amount, abi.encode());
+  }
+
+  function testRevertWhenWrongAmountSentOnMint() public {
+    uint256 id = 1;
+    uint256 amount = 1;
+
+    vm.expectRevert("Payment: wrong amount sent.");
+    vm.prank(datasetConsumerOne);
+    datasetTokens.mint{value: 2 ether}(id, amount, abi.encode());
+  }
+
+  function testMintBatch() public {
+    uint256[] memory ids = new uint256[](2);
+    ids[0] = 1;
+    ids[1] = 2;
+
+    uint256[] memory amounts = new uint256[](2);
+    amounts[0] = 1;
+    amounts[1] = 1;
+
+    vm.expectEmit(true, true, true, true);
+    emit TransferBatch(
+      datasetConsumerOne, address(0), datasetConsumerOne, ids, amounts
+    );
+
+    vm.prank(datasetConsumerOne);
+    datasetTokens.mintBatch{value: 2 ether}(ids, amounts, abi.encode());
+
+    assertEq(1, datasetTokens.balanceOf(datasetConsumerOne, ids[0]));
+    assertEq(1, datasetTokens.balanceOf(datasetConsumerOne, ids[1]));
+  }
+
+  function testRevertWhenTokenDoesNotExistOnMintBatch() public {
+    uint256[] memory ids = new uint256[](2);
+    ids[0] = 2;
+    ids[1] = 3;
+
+    uint256[] memory amounts = new uint256[](2);
+    amounts[0] = 1;
+    amounts[1] = 1;
+
+    vm.expectRevert("Mint: token does not exist.");
+    vm.prank(datasetConsumerOne);
+    datasetTokens.mintBatch{value: 2 ether}(ids, amounts, abi.encode());
+  }
+
+  function testRevertWhenWrongAmountSentOnMintBatch() public {
+    uint256[] memory ids = new uint256[](2);
+    ids[0] = 1;
+    ids[1] = 2;
+
+    uint256[] memory amounts = new uint256[](2);
+    amounts[0] = 1;
+    amounts[1] = 1;
+
+    vm.expectRevert("Payment: wrong amount sent.");
+    vm.prank(datasetConsumerOne);
+    datasetTokens.mintBatch{value: 1 ether}(ids, amounts, abi.encode());
+  }
 }

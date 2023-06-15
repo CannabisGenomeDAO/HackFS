@@ -101,6 +101,40 @@ contract DatasetTokens is ERC1155, Ownable, ERC1155Supply {
     _setURI(newuri);
   }
 
+  function mint(uint256 id, uint256 amount, bytes memory data) public payable {
+    uint256 price = datasetTokenPrices[id];
+    uint256 total = price * amount;
+
+    require(exists(id), "Mint: token does not exist.");
+    require(msg.value == total, "Payment: wrong amount sent.");
+
+    _mint(msg.sender, id, amount, data);
+  }
+
+  function mintBatch(
+    uint256[] memory ids,
+    uint256[] memory amounts,
+    bytes memory data
+  ) public payable {
+    uint256 total;
+
+    for (uint256 i = 0; i < ids.length; i++) {
+      uint256 id = ids[i];
+      uint256 amount = amounts[i];
+
+      uint256 price = datasetTokenPrices[id];
+      uint256 subtotal = price * amount;
+
+      require(exists(id), "Mint: token does not exist.");
+
+      total += subtotal;
+    }
+
+    require(msg.value == total, "Payment: wrong amount sent.");
+
+    _mintBatch(msg.sender, ids, amounts, data);
+  }
+
   // The following functions are overrides required by Solidity.
 
   function _beforeTokenTransfer(
