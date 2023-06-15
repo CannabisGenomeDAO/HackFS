@@ -2,7 +2,7 @@
 
 ## Project
 
-![Diagram of a dataset marketplace](./docs/images/dataset-marketplace.png)
+![Diagram of a dataset marketplace](./assets/images/dataset-marketplace.png)
 
 ### Purpose
 
