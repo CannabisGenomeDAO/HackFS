@@ -47,7 +47,7 @@ contract DatasetTokensTest is DatasetTokens, Test {
     string memory uri = "ipfs://baf-trl";
 
     vm.expectEmit(true, true, false, true);
-    emit CreateDatasetToken(datasetProvider, id, price, expiryTime);
+    emit CreateDatasetToken(datasetProvider, id, price, expiryTime, uri);
 
     vm.expectEmit(true, true, true, true);
     emit TransferSingle(datasetProvider, address(0), datasetProvider, id, 1);
