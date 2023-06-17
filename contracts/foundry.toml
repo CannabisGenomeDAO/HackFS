@@ -19,8 +19,12 @@ calibration = "${CALIBRATION_RPC_URL}"
 filecoin = "${FILECOIN_RPC_URL}"
 
 [etherscan]
+# Ethereum
 sepolia = { key = "${ETHERSCAN_API_KEY}", url = "https://sepolia.etherscan.io/" }
 mainnet = { key = "${ETHERSCAN_API_KEY}" }
+# Polygon: $POLYGONSCAN_API_KEY not working, see: https://github.com/foundry-rs/foundry/issues/4484
+mumbai = { key = "${POLYGONSCAN_API_KEY}", url = "https://api-testnet.polygonscan.com/api"}
+polygon = { key = "${POLYGONSCAN_API_KEY}", url = "https://api.polygonscan.com/api"}
 
 [fmt]
 line_length = 80
