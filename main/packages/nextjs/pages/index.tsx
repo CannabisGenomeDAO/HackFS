@@ -1,32 +1,53 @@
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { NextPage } from "next";
 import { BugAntIcon, MagnifyingGlassIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { MetaHeader } from "~~/components/MetaHeader";
+import { useScaffoldContract, useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
-  const records = [
-    {
-      id: 1,
-      volume: 2412915,
-      timestamp: 1807100000000,
-      asset_type: "dataset",
-      label_type: "PLETUR-55",
-      network: "Polygon",
-      title: "OCEAN/USDT orderbook",
-      publisher: "0x4Ab0…0f6a",
-      description: "Real time BTC/USDT orderbook To take the bid orders, access data.bids array To take t…",
-      price: "18071",
-      symbol: "mOCEAN",
-      total_amount_sales: "2,412,915",
-      total_numb_sales: "43",
-    },
-    {
-      id: 2,
-      price: 2412915,
-      volume: 43,
-      timestamp: 2412915000000,
-    },
-  ];
+  const [tokens, setTokens] = useState([]);
+  const { data: DatasetTokens } = useScaffoldContract({ contractName: "DatasetTokens" });
+
+  useEffect(() => {
+    getDatasetTokens();
+  }, [DatasetTokens]);
+
+  // THINGS TO DO
+  // fetch all tokens from the smart contract and ipfs
+  // onclick display all details of the datset and have a buy mint(1, 1, abi.encode())
+  // add upload to ipfs page
+
+  const getDatasetTokens = async () => {
+    try {
+      console.log("_____getDatasetTokens");
+      const nonce = await DatasetTokens.nonce();
+      console.log("🚀 ~ file: index.tsx:20 ~ getDatasetTokens ~ nonce:", nonce);
+
+      const numOfTokens = nonce.toNumber();
+      console.log("🚀 ~ file: index.tsx:23 ~ getDatasetTokens ~ numOfTokens:", numOfTokens);
+
+      const tokens = [];
+
+      for (let id = 1; id <= numOfTokens; id++) {
+        const price = await DatasetTokens.datasetTokenPrices(id);
+        const expiryTime = await DatasetTokens.datasetTokenExpiryTimes(id);
+        const uri = await DatasetTokens.datasetTokenURIs(id);
+
+        tokens.push({
+          id,
+          price: price.toNumber(),
+          expiryTime: expiryTime.toNumber(),
+          uri,
+        });
+      }
+
+      console.log({ tokens });
+      setTokens(tokens);
+    } catch (error) {
+      console.log({ error });
+    }
+  };
 
   return (
     <>

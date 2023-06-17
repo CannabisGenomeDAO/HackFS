@@ -28,7 +28,6 @@ export const ContractInteraction = () => {
     contractName: "DatasetTokens",
     functionName: "setDatasetTokenPrice",
     args: [dataSetId, newPrice],
-    // value: "",
     onBlockConfirmation: txnReceipt => {
       console.log("📦 Transaction blockHash", txnReceipt.blockHash);
     },

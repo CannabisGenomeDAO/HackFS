@@ -1144,6 +1144,8 @@ contract DatasetTokens is ERC1155, Ownable, ERC1155Supply {
 
   // Mapping from token ID to URI
   mapping(uint256 => string) public datasetTokenURIs;
+//   create a component that gets the id
+//
 
   event CreateDatasetToken(
     address indexed provider,
