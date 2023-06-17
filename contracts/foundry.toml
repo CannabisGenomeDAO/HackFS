@@ -3,12 +3,20 @@ src = "src"
 out = "out"
 libs = ["lib"]
 verbosity = 3
+# Mumabi Testnet
+chain_id = 80001
 
 [rpc_endpoints]
 localhost = "http://localhost:8545"
+# Ethereum
 sepolia = "${SEPOLIA_RPC_URL}"
 mainnet = "${MAINNET_RPC_URL}"
+# Polygon
+mumbai = "${MUMBAI_RPC_URL}"
+polygon = "${POLYGON_RPC_URL}"
+# Filecoin
 calibration = "${CALIBRATION_RPC_URL}"
+filecoin = "${FILECOIN_RPC_URL}"
 
 [etherscan]
 sepolia = { key = "${ETHERSCAN_API_KEY}", url = "https://sepolia.etherscan.io/" }
