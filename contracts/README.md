@@ -47,11 +47,12 @@ Create `.env` file:
 touch .env
 ```
 
-Add Calibration Testnet RPC from [here](https://chainlist.org/chain/314159) and deployment wallet's private key to `.env`:
+Add Mumbai RPC URL, private key and Polygon Scan API Key to `.env`:
 
 ```
-CALIBRATION_RPC_URL=<INSERT URL>
-PRIVATE_KEY=<INSERT PRIVATE KEY>
+MUMBAI_RPC_URL=<INSERT_URL>
+DEPLOY_PRIVATE_KEY=<INSERT_PRIVATE_KEY>
+ETHERSCAN_API_KEY=<INSERT_API_KEY>
 ```
 
 Load environment variables:
@@ -63,14 +64,27 @@ source .env
 Run deployment script:
 
 ```
-forge script script/DatasetTokens.s.sol \ --rpc-url$CALIBRATION_RPC_URL \
---gas-estimate-multiplier=5000 \
---slow --broadcast --verify -vvvv
+forge script script/DatasetTokens.s.sol \
+--rpc-url $MUMBAI_RPC_URL \
+--gas-estimate-multiplier=100 \
+--slow --broadcast --legacy -vvvv
 ```
 
-Note: adjust `--gas-estimate-multiplier` in case of Gas Limit errors.
+Notes:
 
-Flatten the contract for contract verification:
+- adjust `--gas-estimate-multiplier` in case of Gas Limit errors.
+- `--legacy` if or EIP-1559 errors.
+
+Verify the contract with Polyscan:
+
+```
+forge verify-contract \
+--chain mumbai \
+<INSERT_CONTRACT_ADDRESS> \
+src/DatasetTokens.sol:DatasetTokens
+```
+
+Or, flatten the contract for manual contract verification:
 
 ```
 forge flatten --output assets/artifacts/DatasetTokens.f.sol src/DatasetTokens.sol
@@ -78,4 +92,10 @@ forge flatten --output assets/artifacts/DatasetTokens.f.sol src/DatasetTokens.so
 
 ### Deployments
 
+#### Filecoin - Calibration Testnet
+
 - `2023-06-15` | [Filfox Link](https://calibration.filfox.info/en/address/t410fmr5vtcaekfz2xueystizgookgd23v7u2qqn6hna) | [Commit](https://github.com/CannabisGenomeDAO/HackFS/commit/f961a4dbc742096730221150bf36d510673345f4)
+
+#### Polygon - Mumbai Testnet
+
+- `2023-06-17` | [Polyscan Link](https://mumbai.polygonscan.com/address/0x77f9cc01794280758c184e95924a3dd6707316e4) | [Commit](https://github.com/CannabisGenomeDAO/HackFS/commit/e1df594405b937d6c85337a45cbb3e080a0e748e)
