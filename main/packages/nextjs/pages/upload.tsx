@@ -1,14 +1,85 @@
-import React, { useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { apiKey } from "../components/APIKEYS";
+import Lit from "../utils/scaffold-eth/litProtocol";
+import { MyContext } from "./_app";
+import * as LitSDK from "@lit-protocol/lit-node-client";
 import axios from "axios";
+import ShareModal from "lit-share-modal-v3";
 import { File, NFTStorage } from "nft.storage";
 import "react-calendar/dist/Calendar.css";
 import "react-clock/dist/Clock.css";
 import DateTimePicker from "react-datetime-picker";
+// import { useSignMessage } from 'wagmi'
 import "react-datetime-picker/dist/DateTimePicker.css";
-import { useScaffoldContract, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldContract, useScaffoldContractWrite, useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
 
-function ConfirmationUpload({ name, description, tags, image, price, writeToContract }) {
+function ConfirmationUpload({ name, description, tags, image, price, writeToContract, tokenId }) {
+  // const { data, error, isLoading, signMessage, variables } = useSignMessage()
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const { encryptedFile, setEncryptedFile, encryptedSymmetricKey, setEncryptedSymmetricKey } = useContext(MyContext);
+  const myLit = useRef(null);
+  console.log("__encryptedFile:", encryptedFile, encryptedSymmetricKey);
+
+  const onUnifiedAccessControlConditionsSelected = shareModalOutput => {
+    // do things with share modal output
+  };
+
+  const chain = "mumbai";
+  const accessControlConditions = [
+    {
+      contractAddress: "0x77F9Cc01794280758C184E95924a3Dd6707316e4",
+      standardContractType: "ERC1155",
+      chain,
+      method: "balanceOf",
+      parameters: [":userAddress", String(tokenId)],
+      returnValueTest: {
+        comparator: ">=",
+        value: "1",
+      },
+    },
+  ];
+  console.log("___accessControlConditions:", accessControlConditions);
+  console.log("tokenID:", tokenId);
+
+  const encryptFile = async file => {
+    try {
+      console.log("____file:", file);
+      const authSig = await LitSDK.checkAndSignAuthMessage({
+        chain,
+      });
+      const { encryptedFile, symmetricKey } = await LitSDK.encryptFile({ file });
+      const encryptedSymmetricKey = await Lit.litNodeClient.saveEncryptionKey({
+        accessControlConditions,
+        symmetricKey,
+        authSig,
+        chain,
+      });
+      console.log("___authSig_upload:", authSig);
+      console.log("encrypted file & EncryptedSymmetricKey ", encryptedFile, encryptedSymmetricKey);
+
+      localStorage.setItem("encryptedFile", await encryptedFile.text());
+      localStorage.setItem("encryptedSymmetricKey", LitSDK.uint8arrayToString(encryptedSymmetricKey, "base16"));
+      setEncryptedFile(encryptedFile);
+      setEncryptedSymmetricKey(LitSDK.uint8arrayToString(encryptedSymmetricKey, "base16"));
+    } catch (error) {
+      console.log(error);
+      console.log(error.message);
+    }
+  };
+
+  const handleFileChange = event => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+    if (selectedFile) {
+      await encryptFile(selectedFile);
+      console.log("Uploading file:", selectedFile);
+    } else {
+      console.log("No file selected.");
+    }
+  };
   return (
     <div className="flex justify-center p-8">
       <div
@@ -51,12 +122,20 @@ function ConfirmationUpload({ name, description, tags, image, price, writeToCont
         >
           Confirm
         </button>
+
+        <div>
+          <h1>Upload File</h1>
+          <input type="file" onChange={handleFileChange} />
+          <button onClick={handleUpload}>Upload file</button>
+        </div>
       </div>
     </div>
   );
 }
 
 function Upload(props) {
+  console.log("__Lit:", Lit);
+  const [tokenId, setTokenId] = useState(null);
   const [name, setName] = useState("");
   const [displayUpload, setDisplayUpload] = useState(true);
   const [description, setDescription] = useState("");
@@ -64,12 +143,9 @@ function Upload(props) {
   const [value, onChange] = useState(new Date());
   const [price, setPrice] = useState("");
   const [ipf_url, setIpf_url] = useState("");
-  console.log("__state ipf_url:", ipf_url);
   const [image, setImage] = useState("");
 
   const { data: DatasetTokens } = useScaffoldContract({ contractName: "DatasetTokens" });
-  console.log("DatasetTokens", DatasetTokens?.createDatasetToken);
-  console.log("___All:", name, description, tags, value, price, image);
 
   const handleImage = async event => {
     const updataData = new FormData();
@@ -119,13 +195,6 @@ function Upload(props) {
         const fullUrl = `https://cloudflare-ipfs.com/ipfs/${url}`;
         setIpf_url(fullUrl);
         setDisplayUpload(false);
-        // writeToContract(fullUrl);
-        // console.log("fullUrl", fullUrl);
-
-        // const saveToContract = await contract.createGroup(fullUrl, targetAmmount);
-        // const tx = await saveToContract.wait();
-        // console.log("tx", tx);
-        // history.push("/");
       }
     } catch (error) {
       console.log(error);
@@ -133,6 +202,15 @@ function Upload(props) {
   };
 
   const expirationTime = 200;
+
+  useScaffoldEventSubscriber({
+    contractName: "DatasetTokens",
+    eventName: "CreateDatasetToken",
+    listener: async (provider, id, price, expiryTime, uri) => {
+      console.log("___event", provider, id, price, expiryTime, uri);
+      setTokenId(id.toNumber());
+    },
+  });
 
   const { writeAsync: writeToContract, isLoading } = useScaffoldContractWrite({
     contractName: "DatasetTokens",
@@ -253,6 +331,7 @@ function Upload(props) {
           image={image}
           price={price}
           writeToContract={writeToContract}
+          tokenId={tokenId}
         />
       )}
     </div>

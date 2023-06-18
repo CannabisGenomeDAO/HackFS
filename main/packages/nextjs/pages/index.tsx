@@ -1,18 +1,30 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { MyContext } from "./_app";
 import type { NextPage } from "next";
 import { BugAntIcon, MagnifyingGlassIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { MetaHeader } from "~~/components/MetaHeader";
 import { useScaffoldContract, useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
-  const [tokens, setTokens] = useState([]);
+  const { tokens, setTokens } = useContext(MyContext);
+  // const [tokens, setTokens] = useState([]);
+  const router = useRouter();
   const { data: DatasetTokens } = useScaffoldContract({ contractName: "DatasetTokens" });
 
   useEffect(() => {
     getDatasetTokens();
   }, [DatasetTokens]);
 
+  const handleClick = () => {
+    router.push("/datasetDetails");
+
+    console.log("🚀", router.query);
+
+    // setSelectedRestaurant('New value');
+    // console.log("🚀 ~ file: Card.tsx:17 ~ handleClick ~ setSelectedRestaurant:", setSelectedRestaurant);
+  };
   // THINGS TO DO
   // fetch all tokens from the smart contract and ipfs
   // onclick display all details of the datset and have a buy mint(1, 1, abi.encode())
@@ -20,25 +32,33 @@ const Home: NextPage = () => {
 
   const getDatasetTokens = async () => {
     try {
-      console.log("_____getDatasetTokens");
       const nonce = await DatasetTokens.nonce();
-      console.log("🚀 ~ file: index.tsx:20 ~ getDatasetTokens ~ nonce:", nonce);
-
       const numOfTokens = nonce.toNumber();
-      console.log("🚀 ~ file: index.tsx:23 ~ getDatasetTokens ~ numOfTokens:", numOfTokens);
-
       const tokens = [];
 
-      for (let id = 1; id <= numOfTokens; id++) {
+      for (let id = 3; id <= numOfTokens; id++) {
         const price = await DatasetTokens.datasetTokenPrices(id);
         const expiryTime = await DatasetTokens.datasetTokenExpiryTimes(id);
         const uri = await DatasetTokens.datasetTokenURIs(id);
+
+        const getNFTStorageData = await fetch(uri);
+        const dataSet = await getNFTStorageData.json();
+        console.log("______dataSet:", dataSet);
+
+        const dataObj = JSON.parse(dataSet.description);
+        console.log("🚀 ~ file: index.tsx:37 ~ getDatasetTokens ~ dataObj:", dataObj);
+        // obj.fundraiserId = fundraiserId
 
         tokens.push({
           id,
           price: price.toNumber(),
           expiryTime: expiryTime.toNumber(),
-          uri,
+          createdDate: dataObj.createdDate,
+          description: dataObj.description,
+          expiration_date: dataObj.expiration,
+          tags: dataObj.tags,
+          image: dataObj.image,
+          title: dataObj.title,
         });
       }
 
@@ -48,6 +68,8 @@ const Home: NextPage = () => {
       console.log({ error });
     }
   };
+
+  const tokens1 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
   return (
     <>
@@ -66,6 +88,46 @@ const Home: NextPage = () => {
             industries. They can also seamlessly publish their own datasets, contributing to the growing pool of
             knowledge.
           </p>
+        </div>
+
+        <div className="flex-grow bg-base-300 w-full mt-16 px-20 py-12">
+          <div className="flex justify-center items-center gap-12 sm:flex-wrap">
+            {tokens1.length > 0
+              ? tokens1.map((token, idx) => (
+                  <div
+                    className="flex flex-col bg-base-100 px-6 py-6 text-center items-center max-w-xs rounded-3xl"
+                    key={idx}
+                    onClick={handleClick}
+                  >
+                    {/* <BugAntIcon className="h-8 w-8 fill-secondary" /> */}
+                    <div className="flex font-light">
+                      <p className="text-sm px-3 ">dataset</p>
+                      <p className="text-sm px-3 border-l-2 border-solid border-gray-300">PLETUR-55</p>
+                      <p className="text-sm px-3 border-l-2 border-solid border-gray-300">Polygon</p>
+                    </div>
+
+                    <div className="text-left mt-0">
+                      <p className="font-bold mt-0 mb-0">OCEAN/USDT orderbook</p>
+                      <p className="text-sm font-extralight mt-0">0x4Ab0…0f6a</p>
+                      <p className="text-sm font-light mt-0 mb-0">
+                        Real time BTC/USDT orderbook To take the bid orders, access data.bids array To take t…
+                      </p>
+                      <p className="text-md mb-0 ">
+                        <strong>18,071 </strong>
+                        <span className="text-sm font-light">mOCEAN</span>
+                      </p>
+                      <div className="flex justify-between  ">
+                        <p className="text-sm font-light mt-1">2,412,915 veOCEAN</p>
+                        <p className="text-sm font-light mt-1">
+                          {" "}
+                          <strong>43</strong> sales
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              : "No DataSets found"}
+          </div>
         </div>
 
         <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
