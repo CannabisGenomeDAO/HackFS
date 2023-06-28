@@ -1225,7 +1225,6 @@ contract DatasetTokens is ERC1155, Ownable, ERC1155Supply {
   function setURI(string memory newuri) public onlyOwner {
     _setURI(newuri);
   }
-
   function mint(uint256 id, uint256 amount, bytes memory data) public payable {
     uint256 price = datasetTokenPrices[id];
     uint256 total = price * amount;

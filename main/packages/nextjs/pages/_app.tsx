@@ -21,6 +21,7 @@ export const MyContext = createContext({});
 const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
   const [encryptedFile, setEncryptedFile] = useState("");
   const [tokens, setTokens] = useState([]);
+  const [selectedToken, setSelectedToken] = useState(null);
   const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState(null);
   const price = useNativeCurrencyPrice();
   const setNativeCurrencyPrice = useGlobalState(state => state.setNativeCurrencyPrice);
@@ -47,6 +48,8 @@ const ScaffoldEthApp = ({ Component, pageProps }: AppProps) => {
         setEncryptedSymmetricKey,
         tokens,
         setTokens,
+        selectedToken,
+        setSelectedToken,
       }}
     >
       <WagmiConfig client={wagmiClient}>
