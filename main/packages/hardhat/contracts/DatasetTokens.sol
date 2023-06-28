@@ -1144,12 +1144,15 @@ contract DatasetTokens is ERC1155, Ownable, ERC1155Supply {
 
   // Mapping from token ID to URI
   mapping(uint256 => string) public datasetTokenURIs;
+//   create a component that gets the id
+//
 
   event CreateDatasetToken(
     address indexed provider,
     uint256 indexed id,
     uint256 price,
-    uint256 expiryTime
+    uint256 expiryTime,
+    string uri
   );
 
   event SetDatasetTokenPrice(
@@ -1185,7 +1188,7 @@ contract DatasetTokens is ERC1155, Ownable, ERC1155Supply {
     datasetTokenExpiryTimes[id] = expiryTime;
     datasetTokenURIs[id] = uri;
 
-    emit CreateDatasetToken(msg.sender, id, price, expiryTime);
+    emit CreateDatasetToken(msg.sender, id, price, expiryTime, uri);
 
     // Mint one token for the provider in order to create supply to check for
     // token's existence
@@ -1222,7 +1225,6 @@ contract DatasetTokens is ERC1155, Ownable, ERC1155Supply {
   function setURI(string memory newuri) public onlyOwner {
     _setURI(newuri);
   }
-
   function mint(uint256 id, uint256 amount, bytes memory data) public payable {
     uint256 price = datasetTokenPrices[id];
     uint256 total = price * amount;

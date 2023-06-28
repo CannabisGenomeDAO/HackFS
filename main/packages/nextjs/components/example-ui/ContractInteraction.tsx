@@ -24,16 +24,6 @@ export const ContractInteraction = () => {
     },
   });
 
-  const { writeAsync: updatePrice, isLoading: updating } = useScaffoldContractWrite({
-    contractName: "DatasetTokens",
-    functionName: "setDatasetTokenPrice",
-    args: [dataSetId, newPrice],
-    // value: "",
-    onBlockConfirmation: txnReceipt => {
-      console.log("📦 Transaction blockHash", txnReceipt.blockHash);
-    },
-  });
-
   return (
     <div className="flex bg-base-300 relative pb-10">
       <DiamondIcon className="absolute top-24" />

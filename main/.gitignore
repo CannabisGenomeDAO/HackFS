@@ -11,4 +11,8 @@ node_modules
 .eslintcache
 .vscode/**
 .DS_Store
- ../.DS_Store
+../.DS_Store
+../.vscode/
+../node_modules/
+../package.json
+../yarn.lock
